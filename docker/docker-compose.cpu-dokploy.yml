@@ -8,8 +8,6 @@ services:
     container_name: chatterbox-tts-api
     expose:
       - "${PORT}"
-    env_file:
-      - .env
     environment:
       PORT: "${PORT}"
       HOST: "${HOST}"
