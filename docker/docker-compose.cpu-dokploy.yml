@@ -1,11 +1,11 @@
 version: "3.8"
 
 services:
-  chatterbox-tts-api:
+  chatterbox-tts:
     build:
       context: ..
       dockerfile: docker/Dockerfile.cpu
-    container_name: chatterbox-tts-api
+    container_name: chatterbox-tts
     expose:
       - "${PORT}"
     environment:
@@ -69,7 +69,7 @@ services:
     networks:
       - dokploy-network
     depends_on:
-      - chatterbox-tts-api
+      - chatterbox-tts
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=dokploy-network"
