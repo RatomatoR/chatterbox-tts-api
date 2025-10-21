@@ -62,6 +62,10 @@ services:
     container_name: chatterbox-tts-frontend
     expose:
       - "${FRONTEND_PORT}"
+    environment:
+      FRONTEND_PORT: "${FRONTEND_PORT}"
+      HOST: "${HOST}"
+      CHATTERBOX_FRONTEND_HOST: "${CHATTERBOX_FRONTEND_HOST}"
     restart: unless-stopped
     networks:
       - dokploy-network
