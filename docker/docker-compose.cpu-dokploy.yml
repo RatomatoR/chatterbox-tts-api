@@ -62,8 +62,6 @@ services:
     container_name: chatterbox-tts-frontend
     expose:
       - "${FRONTEND_PORT}"
-    env_file:
-      - .env
     restart: unless-stopped
     networks:
       - dokploy-network
