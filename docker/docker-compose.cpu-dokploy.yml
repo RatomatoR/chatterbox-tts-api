@@ -1,0 +1,91 @@
+version: "3.8"
+
+services:
+  chatterbox-tts-api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.cpu
+    container_name: chatterbox-tts-api
+    expose:
+      - "${PORT}"
+    env_file:
+      - .env
+    environment:
+      PORT: "${PORT}"
+      HOST: "${HOST}"
+      DEVICE: "${DEVICE}"
+      USE_MULTILINGUAL_MODEL: "${USE_MULTILINGUAL_MODEL}"
+      EXAGGERATION: "${EXAGGERATION}"
+      CFG_WEIGHT: "${CFG_WEIGHT}"
+      TEMPERATURE: "${TEMPERATURE}"
+      MAX_CHUNK_LENGTH: "${MAX_CHUNK_LENGTH}"
+      MAX_TOTAL_LENGTH: "${MAX_TOTAL_LENGTH}"
+      LONG_TEXT_DATA_DIR: "${LONG_TEXT_DATA_DIR}"
+      LONG_TEXT_MAX_LENGTH: "${LONG_TEXT_MAX_LENGTH}"
+      LONG_TEXT_CHUNK_SIZE: "${LONG_TEXT_CHUNK_SIZE}"
+      LONG_TEXT_SILENCE_PADDING_MS: "${LONG_TEXT_SILENCE_PADDING_MS}"
+      LONG_TEXT_JOB_RETENTION_DAYS: "${LONG_TEXT_JOB_RETENTION_DAYS}"
+      LONG_TEXT_MAX_CONCURRENT_JOBS: "${LONG_TEXT_MAX_CONCURRENT_JOBS}"
+      VOICE_SAMPLE_PATH: "${VOICE_SAMPLE_PATH}"
+      MODEL_CACHE_DIR: "${MODEL_CACHE_DIR}"
+      VOICE_LIBRARY_DIR: "${VOICE_LIBRARY_DIR}"
+      MEMORY_CLEANUP_INTERVAL: "${MEMORY_CLEANUP_INTERVAL}"
+      CUDA_CACHE_CLEAR_INTERVAL: "${CUDA_CACHE_CLEAR_INTERVAL}"
+      ENABLE_MEMORY_MONITORING: "${ENABLE_MEMORY_MONITORING}"
+    volumes:
+      - ./voice-sample.mp3:/app/voice-sample.mp3:ro
+      - ./voices:/voices
+      - ./cache:/cache
+      - ./data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    networks:
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=dokploy-network"
+      - "traefik.http.routers.chatterbox.rule=Host(`${CHATTERBOX_API_HOST}`)"
+      - "traefik.http.routers.chatterbox.entrypoints=websecure"
+      - "traefik.http.routers.chatterbox.tls=true"
+      - "traefik.http.routers.chatterbox.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.chatterbox.service=chatterbox"
+      - "traefik.http.services.chatterbox.loadbalancer.server.port=${PORT}"
+
+  chatterbox-tts-frontend:
+    profiles: ["frontend", "ui", "fullstack"]
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: chatterbox-tts-frontend
+    expose:
+      - "${FRONTEND_PORT}"
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - dokploy-network
+    depends_on:
+      - chatterbox-tts-api
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=dokploy-network"
+      - "traefik.http.routers.chatterbox-frontend.rule=Host(`${CHATTERBOX_FRONTEND_HOST}`)"
+      - "traefik.http.routers.chatterbox-frontend.entrypoints=websecure"
+      - "traefik.http.routers.chatterbox-frontend.tls=true"
+      - "traefik.http.routers.chatterbox-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.chatterbox-frontend.service=chatterbox-frontend"
+      - "traefik.http.services.chatterbox-frontend.loadbalancer.server.port=${FRONTEND_PORT}"
+
+volumes:
+  cache:
+  voices:
+  data:
+
+networks:
+  dokploy-network:
+    external: true
