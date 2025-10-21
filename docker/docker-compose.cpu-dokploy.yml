@@ -65,8 +65,6 @@ services:
       FRONTEND_PORT: "${FRONTEND_PORT}"
       HOST: "${HOST}"
       CHATTERBOX_FRONTEND_HOST: "${CHATTERBOX_FRONTEND_HOST}"
-      BASIC_AUTH_USER: "${BASIC_AUTH_USER}"
-      BASIC_AUTH_PASS_HASH: "${BASIC_AUTH_PASS_HASH}"
     restart: unless-stopped
     networks:
       - dokploy-network
@@ -81,7 +79,7 @@ services:
       - "traefik.http.routers.chatterbox-frontend.tls.certresolver=letsencrypt"
       - "traefik.http.routers.chatterbox-frontend.service=chatterbox-frontend"
       - "traefik.http.services.chatterbox-frontend.loadbalancer.server.port=${FRONTEND_PORT}"
-      - "traefik.http.middlewares.chatterbox-auth.basicauth.users=${BASIC_AUTH_USER}:${BASIC_AUTH_PASS_HASH}"
+      - "traefik.http.middlewares.chatterbox-auth.basicauth.users=ch4tt3rb0x:$2y$05$hAfx0S6lt/u51qoMWAsjfOHSfPVfxBIS.gbYo6FGq7PA3PLeJvfpW"
       - "traefik.http.routers.chatterbox-frontend.middlewares=chatterbox-auth"
 
 volumes:
