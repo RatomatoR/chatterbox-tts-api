@@ -55,7 +55,6 @@ services:
       - "traefik.http.services.chatterbox.loadbalancer.server.port=${PORT}"
 
   chatterbox-tts-frontend:
-    profiles: ["frontend", "ui", "fullstack"]
     build:
       context: ../frontend
       dockerfile: Dockerfile
